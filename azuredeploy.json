@@ -61,11 +61,11 @@
                     },
                     {
                       "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-                      "value": "[reference('microsoft.insights/components/',variables('app_insights_name'),'2015-05-01').InstrumentationKey]"
+                      "value": "[reference(resourceId('Microsoft.Insights/components',variables('app_insights_name')),'2018-05-01-preview').InstrumentationKey]"
                     },
                     {
                       "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
-                      "value": "[reference('microsoft.insights/components/',variables('app_insights_name'),'2015-05-01').ConnectionString]"
+                      "value": "[reference(resourceId('Microsoft.Insights/components',variables('app_insights_name')),'2018-05-01-preview').ConnectionString]"
                     },
                     {
                       "name": "AzureWebJobsStorage",
@@ -108,7 +108,7 @@
             },
             {
               "type": "Microsoft.Insights/components",
-              "apiVersion": "2015-05-01",
+              "apiVersion": "2018-05-01-preview",
               "name": "[variables('app_insights_name')]",
               "location": "[resourceGroup().location]",
               "kind": "web",
