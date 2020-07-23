@@ -12,7 +12,6 @@ pool:
 
 stages:
   - stage: Validation
-    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
     jobs:
       - job: Validation
         steps:
@@ -28,6 +27,8 @@ stages:
               deploymentMode: "Validation"
 
   - stage: Release
+    dependsOn:
+      - Validation
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/release'))
     jobs:
       - job: Release
