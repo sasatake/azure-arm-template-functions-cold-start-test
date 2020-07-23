@@ -3,10 +3,10 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "prefix": {
-      "type": "String"
+      "type": "string"
     },
     "location": {
-      "type": "String"
+      "type": "string"
     }
   },
   "variables": {
@@ -85,7 +85,7 @@
                     }
                   ]
                 },
-                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms',variables('hosting_plan_name'))]",
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms',variables('hosting_plan_name'))]"
               }
             },
             {
@@ -107,7 +107,7 @@
               }
             },
             {
-              "type": "microsoft.insights/components",
+              "type": "Microsoft.Insights/components",
               "apiVersion": "2015-05-01",
               "name": "[variables('app_insights_name')]",
               "location": "[resourceGroup().location]",
