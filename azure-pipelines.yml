@@ -4,19 +4,41 @@
 # https://aka.ms/yaml
 
 trigger:
-- master
+  - master
+  - release
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: "ubuntu-latest"
 
-steps:
-- task: AzureResourceManagerTemplateDeployment@3
-  inputs:
-    deploymentScope: 'Subscription'
-    azureResourceManagerConnection: 'sasatake-azure-service-connection'
-    subscriptionId: $(subscriptionId)
-    location: 'Japan East'
-    templateLocation: 'Linked artifact'
-    csmFile: 'azuredeploy.json'
-    csmParametersFile: 'azuredeploy.parameters.json'
-    deploymentMode: 'Validation'
+stages:
+  - stage: Validation
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+    jobs:
+      - job: Validation
+        steps:
+          - task: AzureResourceManagerTemplateDeployment@3
+            inputs:
+              deploymentScope: "Subscription"
+              azureResourceManagerConnection: "sasatake-azure-service-connection"
+              subscriptionId: $(subscriptionId)
+              location: "Japan East"
+              templateLocation: "Linked artifact"
+              csmFile: "azuredeploy.json"
+              csmParametersFile: "azuredeploy.parameters.json"
+              deploymentMode: "Validation"
+
+  - stage: Release
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/release'))
+    jobs:
+      - job: Release
+        steps:
+          - task: AzureResourceManagerTemplateDeployment@3
+            inputs:
+              deploymentScope: "Subscription"
+              azureResourceManagerConnection: "sasatake-azure-service-connection"
+              subscriptionId: $(subscriptionId)
+              location: "Japan East"
+              templateLocation: "Linked artifact"
+              csmFile: "azuredeploy.json"
+              csmParametersFile: "azuredeploy.parameters.json"
+              deploymentMode: "Incremental"
