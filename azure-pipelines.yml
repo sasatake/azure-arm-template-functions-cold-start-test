@@ -25,7 +25,7 @@ stages:
               scriptType: 'bash'
               scriptLocation: 'inlineScript'
               inlineScript: |
-                '[ az group exists -g ${resourceGroupName} == 'false' ] && az group create -g ${resourceGroupName} -l ${location}'
+                "[ $(az group exists -g ${resourceGroupName}) == 'false' ] && az group create -g ${resourceGroupName} -l ${location}"
       - job: Validation
         steps:
           - task: AzureResourceManagerTemplateDeployment@3
