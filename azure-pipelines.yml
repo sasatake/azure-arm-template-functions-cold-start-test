@@ -43,6 +43,7 @@ stages:
               azureResourceManagerConnection: "sasatake-azure-service-connection"
               subscriptionId: $(subscriptionId)
               resourceGroupName: $(resourceGroupName)
+              location: $(location)
               templateLocation: "Linked artifact"
               csmFile: "azuredeploy.json"
               csmParametersFile: "azuredeploy.parameters.json"
@@ -61,6 +62,7 @@ stages:
               azureResourceManagerConnection: "sasatake-azure-service-connection"
               subscriptionId: $(subscriptionId)
               resourceGroupName: $(resourceGroupName)
+              location: $(location)
               templateLocation: "Linked artifact"
               csmFile: "azuredeploy.json"
               csmParametersFile: "azuredeploy.parameters.json"
