@@ -1,133 +1,105 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
     "prefix": {
       "type": "string"
-    },
-    "location": {
-      "type": "string"
     }
   },
   "variables": {
-    "resource_group_name": "[concat(parameters('prefix'),'-rg')]",
     "functions_name": "[concat(parameters('prefix'),'-functions')]",
-    "hosting_plan_name": "[concat(parameters('prefix'),'-functions-plan')]",
+    "app_service_plan_name": "[concat(parameters('prefix'),'-functions-plan')]",
     "storage_account_name": "[concat(toLower(replace(parameters('prefix'),'-','')),'storage')]",
     "app_insights_name": "[concat(parameters('prefix'),'-insights')]"
   },
   "resources": [
     {
-      "type": "Microsoft.Resources/resourceGroups",
-      "apiVersion": "2019-10-01",
-      "name": "[variables('resource_group_name')]",
-      "location": "[parameters('location')]"
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2019-10-01",
-      "name": "AzureFunctionsDeployment",
-      "resourceGroup": "[variables('resource_group_name')]",
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2018-11-01",
+      "name": "[variables('functions_name')]",
+      "location": "[resourceGroup().location]",
       "dependsOn": [
-        "[resourceId('Microsoft.Resources/resourceGroups/', variables('resource_group_name'))]"
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storage_account_name'))]",
+        "[resourceId('Microsoft.Insights/components', variables('app_insights_name'))]"
       ],
+      "kind": "functionapp",
       "properties": {
-        "mode": "Incremental",
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "resources": [
+        "name": "[variables('functions_name')]",
+        "siteConfig": {
+          "appSettings": [
             {
-              "type": "Microsoft.Web/sites",
-              "apiVersion": "2018-11-01",
-              "name": "[variables('functions_name')]",
-              "location": "[resourceGroup().location]",
-              "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', variables('storage_account_name'))]",
-                "[resourceId('Microsoft.Insights/components', variables('app_insights_name'))]"
-              ],
-              "kind": "functionapp",
-              "properties": {
-                "name": "[variables('functions_name')]",
-                "siteConfig": {
-                  "appSettings": [
-                    {
-                      "name": "FUNCTIONS_EXTENSION_VERSION",
-                      "value": "~3"
-                    },
-                    {
-                      "name": "FUNCTIONS_WORKER_RUNTIME",
-                      "value": "node"
-                    },
-                    {
-                      "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-                      "value": "[reference(resourceId('Microsoft.Insights/components',variables('app_insights_name')),'2018-05-01-preview').InstrumentationKey]"
-                    },
-                    {
-                      "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
-                      "value": "[reference(resourceId('Microsoft.Insights/components',variables('app_insights_name')),'2018-05-01-preview').ConnectionString]"
-                    },
-                    {
-                      "name": "AzureWebJobsStorage",
-                      "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storage_account_name'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storage_account_name')), '2019-06-01').keys[0].value,';EndpointSuffix=','core.windows.net')]"
-                    },
-                    {
-                      "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
-                      "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storage_account_name'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storage_account_name')), '2019-06-01').keys[0].value,';EndpointSuffix=','core.windows.net')]"
-                    },
-                    {
-                      "name": "WEBSITE_CONTENTSHARE",
-                      "value": "[toLower(variables('functions_name'))]"
-                    },
-                    {
-                      "name": "WEBSITE_NODE_DEFAULT_VERSION",
-                      "value": "~12"
-                    }
-                  ]
-                },
-                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms',variables('hosting_plan_name'))]"
-              }
+              "name": "FUNCTIONS_EXTENSION_VERSION",
+              "value": "~3"
             },
             {
-              "type": "Microsoft.Web/serverfarms",
-              "apiVersion": "2018-02-01",
-              "name": "[variables('hosting_plan_name')]",
-              "location": "[resourceGroup().location]",
-              "tags": {},
-              "properties": {
-                "name": "[variables('hosting_plan_name')]",
-                "computeMode": "Dynamic"
-              },
-              "sku": {
-                "name": "Y1",
-                "tier": "Dynamic",
-                "size": "Y1",
-                "family": "Y",
-                "capacity": 0
-              }
+              "name": "FUNCTIONS_WORKER_RUNTIME",
+              "value": "node"
             },
             {
-              "type": "Microsoft.Insights/components",
-              "apiVersion": "2018-05-01-preview",
-              "name": "[variables('app_insights_name')]",
-              "location": "[resourceGroup().location]",
-              "kind": "web",
-              "properties": {
-                "Application_Type": "web"
-              }
+              "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+              "value": "[reference(resourceId('Microsoft.Insights/components',variables('app_insights_name')),'2018-05-01-preview').InstrumentationKey]"
             },
             {
-              "type": "Microsoft.Storage/storageAccounts",
-              "apiVersion": "2019-06-01",
-              "name": "[variables('storage_account_name')]",
-              "location": "[resourceGroup().location]",
-              "kind": "StorageV2",
-              "sku": {
-                "name": "Standard_LRS"
-              }
+              "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+              "value": "[reference(resourceId('Microsoft.Insights/components',variables('app_insights_name')),'2018-05-01-preview').ConnectionString]"
+            },
+            {
+              "name": "AzureWebJobsStorage",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storage_account_name'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storage_account_name')), '2019-06-01').keys[0].value,';EndpointSuffix=','core.windows.net')]"
+            },
+            {
+              "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storage_account_name'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storage_account_name')), '2019-06-01').keys[0].value,';EndpointSuffix=','core.windows.net')]"
+            },
+            {
+              "name": "WEBSITE_CONTENTSHARE",
+              "value": "[toLower(variables('functions_name'))]"
+            },
+            {
+              "name": "WEBSITE_NODE_DEFAULT_VERSION",
+              "value": "~12"
             }
           ]
-        }
+        },
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms',variables('app_service_plan_name'))]"
+      }
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2018-02-01",
+      "name": "[variables('app_service_plan_name')]",
+      "location": "[resourceGroup().location]",
+      "tags": {},
+      "properties": {
+        "name": "[variables('app_service_plan_name')]",
+        "computeMode": "Dynamic"
+      },
+      "sku": {
+        "name": "Y1",
+        "tier": "Dynamic",
+        "size": "Y1",
+        "family": "Y",
+        "capacity": 0
+      }
+    },
+    {
+      "type": "Microsoft.Insights/components",
+      "apiVersion": "2018-05-01-preview",
+      "name": "[variables('app_insights_name')]",
+      "location": "[resourceGroup().location]",
+      "kind": "web",
+      "properties": {
+        "Application_Type": "web"
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2019-06-01",
+      "name": "[variables('storage_account_name')]",
+      "location": "[resourceGroup().location]",
+      "kind": "StorageV2",
+      "sku": {
+        "name": "Standard_LRS"
       }
     }
   ]
