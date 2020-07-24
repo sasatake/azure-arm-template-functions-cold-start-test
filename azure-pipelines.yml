@@ -15,18 +15,24 @@ pool:
   vmImage: "ubuntu-latest"
 
 stages:
-  - stage: Validation
+  - stage: Preparation
     jobs:
-      - job: CreateResourceGroup
-        steps:
-          - task: AzureCLI@2
-            inputs:
-              azureSubscription: 'sasatake-azure-service-connection'
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
-              inlineScript: |
-                "[ $(az group exists -g ${resourceGroupName}) == 'false' ] && az group create -g ${resourceGroupName} -l ${location}"
-      - job: Validation
+    - job: CreateResourceGroup
+      steps:
+        - task: AzureCLI@2
+          inputs:
+            azureSubscription: 'sasatake-azure-service-connection'
+            scriptType: 'bash'
+            scriptLocation: 'inlineScript'
+            inlineScript: |
+              "[ $(az group exists -g ${1}) == 'false' ] && az group create -g ${1} -l ${2}"
+            arguments: "$(resourceGroupName) $(location)"
+
+  - stage: Validation
+    dependsOn:
+      - Preparation
+    jobs:
+      - job: ValidateTemplate
         steps:
           - task: AzureResourceManagerTemplateDeployment@3
             inputs:
@@ -44,7 +50,7 @@ stages:
     dependsOn:
       - Validation
     jobs:
-      - job: Release
+      - job: ProvisionResources
         steps:
           - task: AzureResourceManagerTemplateDeployment@3
             inputs:
