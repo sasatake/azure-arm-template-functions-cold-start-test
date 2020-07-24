@@ -25,7 +25,10 @@ stages:
             scriptType: 'bash'
             scriptLocation: 'inlineScript'
             inlineScript: |
-              "if [ $(az group exists -g ${1}) == 'false' ];then az group create -g ${1} -l ${2};fi"
+              isExisted=$(az group exists -g ${1})
+              if [ ${isExisted} == 'false' ];then
+                az group create -g ${1} -l ${2};
+              fi
             arguments: "$(resourceGroupName) $(location)"
 
   - stage: Validation
