@@ -116,7 +116,11 @@
         "consistencyPolicy": {
           "defaultConsistencyLevel": "Session"
         },
-        "locations": []
+        "locations": [
+          {
+            "locationName": "[resourceGroup().location]"
+          }
+        ]
       }
     },
     {
