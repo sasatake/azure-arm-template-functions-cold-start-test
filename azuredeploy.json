@@ -10,7 +10,10 @@
     "functions_name": "[concat(parameters('prefix'),'-functions')]",
     "app_service_plan_name": "[concat(parameters('prefix'),'-functions-plan')]",
     "storage_account_name": "[concat(toLower(replace(parameters('prefix'),'-','')),'storage')]",
-    "app_insights_name": "[concat(parameters('prefix'),'-insights')]"
+    "app_insights_name": "[concat(parameters('prefix'),'-insights')]",
+    "cosmosdb_account_name": "[concat(parameters('prefix'),'-account')]",
+    "cosmosdb_database_name": "[concat(parameters('prefix'),'-database')]",
+    "cosmosdb_container_names": [ "User" ]
   },
   "resources": [
     {
@@ -100,6 +103,48 @@
       "kind": "StorageV2",
       "sku": {
         "name": "Standard_LRS"
+      }
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts",
+      "apiVersion": "2020-04-01",
+      "name": "[variables('cosmosdb_account_name')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "enableFreeTier": true,
+        "databaseAccountOfferType": "Standard",
+        "consistencyPolicy": {
+          "defaultConsistencyLevel": "Session"
+        },
+        "locations": []
+      }
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases",
+      "apiVersion": "2020-04-01",
+      "name": "[concat(variables('cosmosdb_account_name'), '/', variables('cosmosdb_database_name'))]",
+      "dependsOn": [ "[resourceId('Microsoft.DocumentDB/databaseAccounts', variables('cosmosdb_account_name'))]" ],
+      "properties": {
+        "resource": {
+          "id": "[variables('cosmosdb_database_name')]"
+        },
+        "options": { "throughput": 400 }
+      }
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "apiVersion": "2020-04-01",
+      "name": "[concat(variables('cosmosdb_account_name'), '/', variables('cosmosdb_database_name'),'/', variables('cosmosdb_container_names')[copyIndex()])]",
+      "dependsOn": [ "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('cosmosdb_account_name'), variables('cosmosdb_database_name'))]" ],
+      "properties": {
+        "resource": {
+          "id": "[variables('cosmosdb_container_names')[copyIndex()]]"
+        },
+        "options": {}
+      },
+      "copy": {
+        "name": "cosmosdb_container_copy",
+        "count": "[length(variables('cosmosdb_container_names'))]"
       }
     }
   ]
