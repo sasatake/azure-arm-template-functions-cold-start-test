@@ -13,7 +13,17 @@
     "app_insights_name": "[concat(parameters('prefix'),'-insights')]",
     "cosmosdb_account_name": "[concat(parameters('prefix'),'-account')]",
     "cosmosdb_database_name": "[concat(parameters('prefix'),'-database')]",
-    "cosmosdb_container_names": [ "User" ]
+    "cosmosdb_containers": [
+      {
+        "name": "User",
+        "partitionKey": {
+          "paths": [
+            "/id"
+          ],
+          "kind": "Hash"
+        }
+      }
+    ]
   },
   "resources": [
     {
@@ -138,17 +148,18 @@
     {
       "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
       "apiVersion": "2020-04-01",
-      "name": "[concat(variables('cosmosdb_account_name'), '/', variables('cosmosdb_database_name'),'/', variables('cosmosdb_container_names')[copyIndex()])]",
+      "name": "[concat(variables('cosmosdb_account_name'), '/', variables('cosmosdb_database_name'),'/', variables('cosmosdb_containers')[copyIndex()].name)]",
       "dependsOn": [ "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', variables('cosmosdb_account_name'), variables('cosmosdb_database_name'))]" ],
       "properties": {
         "resource": {
-          "id": "[variables('cosmosdb_container_names')[copyIndex()]]"
+          "id": "[variables('cosmosdb_containers')[copyIndex()].name]",
+          "partitionKey": "[variables('cosmosdb_containers')[copyIndex()].partitionKey]"
         },
         "options": {}
       },
       "copy": {
         "name": "cosmosdb_container_copy",
-        "count": "[length(variables('cosmosdb_container_names'))]"
+        "count": "[length(variables('cosmosdb_containers'))]"
       }
     }
   ]
