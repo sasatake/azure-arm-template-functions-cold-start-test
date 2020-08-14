@@ -71,7 +71,16 @@
             {
               "name": "WEBSITE_NODE_DEFAULT_VERSION",
               "value": "~12"
+            },
+            {
+              "name": "CosmosDB_ConnectionString",
+              "value": "[listConnectionStrings(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('cosmosdb_account_name')), '2020-04-01').connectionStrings[0].connectionString]"
+            },
+            {
+              "name": "CosmosDB_DatabaseName",
+              "value": "[variables('cosmosdb_database_name')]"
             }
+
           ]
         },
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms',variables('app_service_plan_name'))]"
