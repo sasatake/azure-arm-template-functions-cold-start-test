@@ -20,7 +20,8 @@
           "paths": [
             "/id"
           ],
-          "kind": "Hash"
+          "kind": "Hash",
+          "defaultTtl": 86400
         }
       }
     ]
@@ -162,7 +163,8 @@
       "properties": {
         "resource": {
           "id": "[variables('cosmosdb_containers')[copyIndex()].name]",
-          "partitionKey": "[variables('cosmosdb_containers')[copyIndex()].partitionKey]"
+          "partitionKey": "[variables('cosmosdb_containers')[copyIndex()].partitionKey]",
+          "defaultTtl": "[variables('cosmosdb_containers')[copyIndex()].defaultTtl]"
         },
         "options": {}
       },
