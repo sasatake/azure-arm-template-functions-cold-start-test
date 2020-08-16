@@ -10,6 +10,11 @@
     "functions_name": "[concat(parameters('prefix'),'-functions')]",
     "app_service_plan_name": "[concat(parameters('prefix'),'-functions-plan')]",
     "storage_account_name": "[concat(toLower(replace(parameters('prefix'),'-','')),'storage')]",
+    "blob_containers": [
+      {
+        "name": "user-icons"
+      }
+    ],
     "app_insights_name": "[concat(parameters('prefix'),'-insights')]",
     "cosmosdb_account_name": "[concat(parameters('prefix'),'-account')]",
     "cosmosdb_database_name": "[concat(parameters('prefix'),'-database')]",
@@ -123,6 +128,16 @@
       "kind": "StorageV2",
       "sku": {
         "name": "Standard_LRS"
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+      "name": "[concat(variables('storage_account_name'), '/default/', variables('blob_containers')[copyIndex()].name)]",
+      "apiVersion": "2019-06-01",
+      "properties": {},
+      "copy": {
+        "name": "blob_container_copy",
+        "count": "[length(variables('blob_containers'))]"
       }
     },
     {
